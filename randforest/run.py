@@ -1,7 +1,10 @@
+#  -*- coding: utf-8 -*-
+
 import csv
 import math
 
 data = csv.reader(open("titanic.csv", "r"))
+twitter_data = csv.reader(open('tweets.csv', 'r', encoding='utf8'))
 alldata = []
 
 def getOldYoung(age):
@@ -81,12 +84,36 @@ def buildTree(oneclass, spaces=' '):
 	if(isEmpty(oneclass) or isPure(oneclass)):
 		print(spaces, ' then ', mostCommon(oneclass))
 		print(spaces, '#confidence', confidence(oneclass))
-		actualClassifier += '\n' + spaces + 'return (' + mostCommon(oneclass) + ')'
+		actualClassifier += '\n' + spaces + 'return (' + mostCommon(oneclass) + ')\n'
 		return
 	highest = getHighestGain(oneclass)
 	d = split(oneclass, highest)
 	for key, value in d.items():
 		print(spaces, 'if', key)
-		buildTree(value, spaces + "   ")
+		actualClassifier += '\n' + spaces + 'if(data[' + str(highest) + '] == \"' + str(key) + '\"):'
+		buildTree(value, spaces + '   ')
 
-buildTree(trainingdata)
+
+d = [d for d in twitter_data]
+person = [x[1] for x in d[1:]]
+print(person.count('realDonaldTrump'))
+print(person.count('HillaryClinton'))
+
+
+
+if False:
+	buildTree(trainingdata)
+	print(actualClassifier)
+	exec(actualClassifier)
+	correct, wrong = 0,0
+
+	for data in verificationdata:
+		if(int(data[0]) == int(classify(data))):
+			correct += 1
+		else:
+			wrong += 1
+
+	print('Correct classifications', correct)
+	print('Wrong classifications', wrong)
+	print('Accuracy', correct / (correct + wrong))
+
