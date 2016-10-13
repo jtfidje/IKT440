@@ -94,26 +94,18 @@ def buildTree(oneclass, spaces=' '):
 		buildTree(value, spaces + '   ')
 
 
-d = [d for d in twitter_data]
-person = [x[1] for x in d[1:]]
-print(person.count('realDonaldTrump'))
-print(person.count('HillaryClinton'))
+buildTree(trainingdata)
+print(actualClassifier)
+exec(actualClassifier)
+correct, wrong = 0,0
 
+for data in verificationdata:
+	if(int(data[0]) == int(classify(data))):
+		correct += 1
+	else:
+		wrong += 1
 
-
-if False:
-	buildTree(trainingdata)
-	print(actualClassifier)
-	exec(actualClassifier)
-	correct, wrong = 0,0
-
-	for data in verificationdata:
-		if(int(data[0]) == int(classify(data))):
-			correct += 1
-		else:
-			wrong += 1
-
-	print('Correct classifications', correct)
-	print('Wrong classifications', wrong)
-	print('Accuracy', correct / (correct + wrong))
+print('Correct classifications', correct)
+print('Wrong classifications', wrong)
+print('Accuracy', correct / (correct + wrong))
 
