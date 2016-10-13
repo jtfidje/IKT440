@@ -1,15 +1,15 @@
 import pdb
-
 import csv
 import math
 import random
+from DecisionTree import DecisionTree
 
 
 # Global vars
 TREES = 50
 THRESHOLD = 10
 MIN_FEAT = 2
-MAX_FEAT = 10
+MAX_FEAT = 5
 
 # Read and extract relevant data
 data = [d for d in csv.reader(open('tweets.csv', 'r', encoding='utf8'))]
@@ -39,7 +39,8 @@ for tweet in alldata:
 
 # Split m into random sub-matrices
 # Random columns and data entries
-m_trees = []
+tree_data = []
+forest = []
 random.shuffle(alldata)
 for i in range(0, len(m), TREES):
 	temp = []
@@ -53,15 +54,18 @@ for i in range(0, len(m), TREES):
 	for tweet in alldata[i:i + TREES]:
 		person = tweet[0]
 		words = tweet[1].split()
-		entry = [True if c in words else False for c in temp[0]]
+		entry = [1 if c in words else 0 for c in temp[0]]
 		entry.append(person)
 		temp.append(entry)
 
 
-	m_trees.append(temp)
+	tree_data.append(temp)
 
+# Create / Init. the forest
+for data in tree_data:
+	forest.append(DecisionTree(data, -1))
 
+for tree in forest:
+	tree.buildTree()
 
-
-
-
+forest[0].print_classifier()

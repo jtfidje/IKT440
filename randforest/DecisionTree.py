@@ -1,19 +1,20 @@
 #  -*- coding: utf-8 -*-
-
+import sys
 import csv
 import math
 
+sys.setrecursionlimit(1500)
 
 class DecisionTree:
 
-	def __init__(self, data):
+	def __init__(self, data, index):
 		self.classifier = 'def classify(self, data):'
 		self.data = data[1:]
 		self.features = data[0]
+		self.index = index
 
 
-	def split(self, attribute, remove=False):
-		data = self.data
+	def split(self, data, attribute, remove=False):
 		retvals = {}
 		allattributes = set([i[attribute] for i in data])
 		for d in data:
@@ -27,8 +28,8 @@ class DecisionTree:
 
 
 	def entropy(self, oneclass):
-		pos = len([i for i in oneclass if i[0] == '0'])
-		neg = len([i for i in oneclass if i[0] == '1'])
+		pos = len([i for i in oneclass if i[self.index] == 'HillaryClinton'])
+		neg = len([i for i in oneclass if i[self.index] == 'realDonaldTrump'])
 		total = pos + neg
 		if(min((pos, neg)) == 0):
 			return 0
@@ -37,16 +38,16 @@ class DecisionTree:
 
 
 	def gain(self, oneclass, attribute):
-			d = [(self.entropy(i), len(i)) for i in split(oneclass, attribute, False).values()]
-			nAll = sum([i[1] for i in d])
-			gain = sum([(i[0] * i[1]) / nAll for i in d])
-			return gain
+		d = [(self.entropy(i), len(i)) for i in self.split(oneclass, attribute, False).values()]
+		nAll = sum([i[1] for i in d])
+		gain = sum([(i[0] * i[1]) / nAll for i in d])
+		return gain
 
 
 	def getHighestGain(self, oneclass):
-		before = entropy(oneclass)
-		classes = [i for i in range(1, len(oneclass[0]))]
-		entropies = [gain(oneclass, c) for c in classes]
+		before = self.entropy(oneclass)
+		classes = [i for i in range(0, len(oneclass[0]) - 1)]
+		entropies = [self.gain(oneclass, c) for c in classes]
 		return entropies.index(min(entropies)) + 1
 
 
@@ -70,18 +71,20 @@ class DecisionTree:
 
 	def confidence(self, oneclass):
 		mostcommon = self.mostCommon(oneclass)
-		return len([i[0] for i in oneclass if i[0] == mostcommon]) / len(oneclass)
+		return len([i[self.index] for i in oneclass if i[self.index] == mostcommon]) / len(oneclass)
 
 
-	def buildTree(self, oneclass=self.data, spaces='   '):
-		if(isEmpty(oneclass) or self.isPure(oneclass)):
+	def buildTree(self, oneclass=None, spaces='   '):
+		if not oneclass:
+			oneclass = self.data
+		if(self.isEmpty(oneclass) or self.isPure(oneclass)):
 			# print(spaces, ' then ', self.mostCommon(oneclass))
 			# print(spaces, '#confidence', self.confidence(oneclass))
-			self.classifier += '\n' + spaces + 'return (' + self.mostCommon(oneclass) + ')\n'
+			self.classifier += '\n' + spaces + 'return (' + str(self.mostCommon(oneclass)) + ')\n'
 			return
 
 		highest = self.getHighestGain(oneclass)
-		d = split(oneclass, highest)
+		d = self.split(oneclass, highest)
 		for key, value in d.items():
 			# print(spaces, 'if', key)
 			self.classifier += '\n' + spaces + 'if(data[' + str(highest) + '] == \"' + str(key) + '\"):'
@@ -92,7 +95,7 @@ class DecisionTree:
 		print(self.classifier)
 		
 	
-	def predict(self, data)
+	def predict(self, data):
 		exec(actualClassifier)
 		correct, wrong = 0,0
 
