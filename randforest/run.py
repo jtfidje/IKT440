@@ -84,7 +84,7 @@ def buildTree(oneclass, spaces=' '):
 	if(isEmpty(oneclass) or isPure(oneclass)):
 		print(spaces, ' then ', mostCommon(oneclass))
 		print(spaces, '#confidence', confidence(oneclass))
-		actualClassifier += '\n' + spaces + 'return (' + mostCommon(oneclass) + ')\n'
+		actualClassifier += '\n{}return ({})\n'.format(spaces, mostCommon(oneclass))
 		return
 	highest = getHighestGain(oneclass)
 	d = split(oneclass, highest)

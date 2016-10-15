@@ -6,10 +6,10 @@ from DecisionTree import DecisionTree
 
 
 # Global vars
-TREES = 50
-THRESHOLD = 10
-MIN_FEAT = 2
-MAX_FEAT = 5
+TREES = 100
+THRESHOLD = 50
+MIN_FEAT = 50
+MAX_FEAT = 100
 
 # Read and extract relevant data
 data = [d for d in csv.reader(open('tweets.csv', 'r', encoding='utf8'))]
@@ -29,35 +29,30 @@ print('Dict after threshold:', len(dictionary))	# Print len after applying thres
 
 # Create full data matrix from dictionary
 cols = list(dictionary.keys())
-m = []
-for tweet in alldata:
-	person = tweet[0]
-	words = tweet[1].split()
-	entry = [True if c in words else False for c in cols]
-	entry.append(person)
-	m.append(entry)
+
+train = alldata[:int(len(alldata) / 2)]
+test = alldata[int(len(alldata) / 2)]
 
 # Split m into random sub-matrices
 # Random columns and data entries
 tree_data = []
 forest = []
-random.shuffle(alldata)
-for i in range(0, len(m), TREES):
+for i in range(TREES):
 	temp = []
 
 	# Select the features
 	random.shuffle(cols)
-	num = random.randrange(MIN_FEAT, MAX_FEAT + 1)
-	temp.append(cols[:num + 1])
+	num_cols = random.randrange(MIN_FEAT, MAX_FEAT + 1)
+	temp.append(cols[:num_cols + 1])
 
-	# Select data
-	for tweet in alldata[i:i + TREES]:
+	# Select random data
+	x = random.randrange(0, len(train) - 100)
+	y = random.randrange(x, len(train))
+	for tweet in train[x:y]:
 		person = tweet[0]
 		words = tweet[1].split()
-		entry = [1 if c in words else 0 for c in temp[0]]
-		entry.append(person)
+		entry = [person] + [1 if c in words else 0 for c in temp[0]]
 		temp.append(entry)
-
 
 	tree_data.append(temp)
 
@@ -66,6 +61,29 @@ for data in tree_data:
 	forest.append(DecisionTree(data, -1))
 
 for tree in forest:
-	tree.buildTree()
+	tree.buildTree(tree.data)
+	tree.execute()
 
-forest[0].print_classifier()
+# Run test
+correct, wrong = 0, 0
+for tweet in test:
+	predictions = []
+	person = tweet[0]
+	words = tweet[1].split()
+	for tree in forest:
+		entry = [1 if c in words else 0 for c in tree.features]
+		predictions.append(tree.predict(entry))
+
+	p = 'HillaryClinton'
+	x = predictions.count('HillaryClinton')
+	if predictions.count('realDonaldTrump') > x:
+		p = 'realDonaldTrump'
+
+	if(p == person):
+		correct += 1
+	else:
+		wrong += 1
+
+print('Correct classifications', correct)
+print('Wrong classifications', wrong)
+print('Accuracy', correct / (correct + wrong))

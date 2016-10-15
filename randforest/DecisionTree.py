@@ -28,8 +28,8 @@ class DecisionTree:
 
 
 	def entropy(self, oneclass):
-		pos = len([i for i in oneclass if i[self.index] == 'HillaryClinton'])
-		neg = len([i for i in oneclass if i[self.index] == 'realDonaldTrump'])
+		pos = len([i for i in oneclass if i[0] == 'HillaryClinton'])
+		neg = len([i for i in oneclass if i[0] == 'realDonaldTrump'])
 		total = pos + neg
 		if(min((pos, neg)) == 0):
 			return 0
@@ -71,15 +71,11 @@ class DecisionTree:
 
 	def confidence(self, oneclass):
 		mostcommon = self.mostCommon(oneclass)
-		return len([i[self.index] for i in oneclass if i[self.index] == mostcommon]) / len(oneclass)
+		return len([i[0] for i in oneclass if i[0] == mostcommon]) / len(oneclass)
 
 
-	def buildTree(self, oneclass=None, spaces='   '):
-		if not oneclass:
-			oneclass = self.data
+	def buildTree(self, oneclass, spaces='   '):
 		if(self.isEmpty(oneclass) or self.isPure(oneclass)):
-			# print(spaces, ' then ', self.mostCommon(oneclass))
-			# print(spaces, '#confidence', self.confidence(oneclass))
 			self.classifier += '\n' + spaces + 'return (' + str(self.mostCommon(oneclass)) + ')\n'
 			return
 
@@ -94,18 +90,10 @@ class DecisionTree:
 	def print_classifier(self):
 		print(self.classifier)
 		
+
+	def execute(self):
+		exec(self.classifier)
 	
 	def predict(self, data):
-		exec(actualClassifier)
-		correct, wrong = 0,0
-
-		for d in data:
-			if(d[-1] == self.classify(d)):
-				correct += 1
-			else:
-				wrong += 1
-
-		print('Correct classifications', correct)
-		print('Wrong classifications', wrong)
-		print('Accuracy', correct / (correct + wrong))
+		return self.classify(data)
 
